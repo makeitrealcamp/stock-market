@@ -28,6 +28,9 @@ class StocksController < ApplicationController
 
     respond_to do |format|
       if @stock.save
+        redis = Redis.new
+        redis.publish('stocks.create', @stock.to_json)
+
         format.html { redirect_to @stock, notice: 'Stock was successfully created.' }
         format.json { render :show, status: :created, location: @stock }
       else

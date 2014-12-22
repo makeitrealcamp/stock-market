@@ -6,16 +6,20 @@ class DashboardController < ApplicationController
 
   def events
     response.headers['Content-Type'] = 'text/event-stream'
+
     sse = SSE.new(response.stream, retry: 300, event: "notification")
+    redis = Redis.new
 
     begin
-      # Aqui va la logica (puede ser un pub/sub en redis o postgres)
-      if 1 == 1
-        sse.write({ message: 'Hola', date: Time.now })
+      redis.subscribe('stocks.create') do |on|
+        on.message do |channel, msg|
+          sse.write({ message: msg, date: Time.now })
+        end
       end
     rescue
       # log ...
     ensure
+      redis.quit
       sse.close
     end
   end
