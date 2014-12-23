@@ -8,7 +8,7 @@ class DashboardController < ApplicationController
     response.headers['Content-Type'] = 'text/event-stream'
 
     sse = SSE.new(response.stream, retry: 300, event: "notification")
-    redis = Redis.new
+    redis = redis_connection
 
     begin
       redis.subscribe('stocks.create') do |on|
